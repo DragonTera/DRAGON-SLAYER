@@ -1,0 +1,11 @@
+{
+    "version": 1.00,
+    "data": {
+        "DEBUG": false,
+        "ENABLE": true,
+        "FORCE_PUNISHING_BLOW": true,
+        "AUTO_MEASURED_SLICE": true,
+        "FORCE_HEADLONG_RUSH": true,
+        "OVERPOWER_NOTIFY": true
+    }
+}
