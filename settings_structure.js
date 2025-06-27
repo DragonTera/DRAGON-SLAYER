@@ -5,6 +5,11 @@ module.exports = [
         "type": "bool"
     },
     {
+        "key": "KNOCKDOWN_FAST",
+        "name": "Enable fast Knockdown Strike:",
+        "type": "bool"
+    },
+    {
         "key": "FORCE_PUNISHING_BLOW",
         "name": "Force Punishing Blow before Measured Slice:",
         "type": "bool"

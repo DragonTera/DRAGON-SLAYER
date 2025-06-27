@@ -2,6 +2,7 @@ const DefaultSettings =
 {
     "DEBUG": false,
     "ENABLE": true,
+    "KNOCKDOWN_FAST": true,
     "FORCE_PUNISHING_BLOW": true,
     "AUTO_MEASURED_SLICE": true,
     "FORCE_HEADLONG_RUSH": true,

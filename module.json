@@ -3,12 +3,12 @@
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for lancer.",
-    "version": "1.00",
+    "version": "1.01",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
         "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
         "guiName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
-        "settingsVersion": 1.00,
+        "settingsVersion": 1.01,
         "settingsFile": "config.json",
         "settingsMigrator": "settings_migrator.js"
     }
