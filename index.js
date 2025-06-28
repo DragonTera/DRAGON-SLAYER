@@ -507,7 +507,7 @@ module.exports = function slayer(mod)
                 setTimeout(function ()
                 {
                     _SkillStart(__event, __event.skill, true);
-                }, 200 / mySpeed);
+                }, mod.settings.SAVAGE_STRIKE_DELAY / mySpeed);
             }
         }
 
@@ -541,7 +541,7 @@ module.exports = function slayer(mod)
     let ui = null;
     if(global.TeraProxy.GUIMode)
     {
-        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: 320, width: 720});
+        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: 355, width: 720});
         
         ui.on('update', settings => 
         {

@@ -20,6 +20,14 @@ module.exports = [
         "type": "bool"
     },
     {
+        "key": "SAVAGE_STRIKE_DELAY",
+        "name": "Delay Savage Strike double:",
+        "type": "number",
+        "min": 100,
+        "max": 1000,
+        "step": 1
+    },
+    {
         "key": "KNOCKDOWN_FAST",
         "name": "Enable fast Knockdown Strike:",
         "type": "bool"
