@@ -500,14 +500,14 @@ module.exports = function slayer(mod)
             else if(mod.settings.SAVAGE_STRIKE_DOUBLE == true && (event.skill.id == S_SAVAGE_STRIKE_0 || event.skill.id == S_SAVAGE_STRIKE_1))
             {
                 let __event     = event;
-                __event.loc     = playerLoc;
+                __event.loc     = event.dest;
                 __event.skill   = S_SAVAGE_STRIKE_0;
                 __event.w       = __event.w > 0 ? __event.w - Math.PI : __event.w + Math.PI;
 
                 setTimeout(function ()
                 {
                     _SkillStart(__event, __event.skill, true);
-                }, mod.settings.SAVAGE_STRIKE_DELAY / mySpeed);
+                }, mod.settings.SAVAGE_STRIKE_DELAY * mySpeed);
             }
         }
 

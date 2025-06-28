@@ -3,7 +3,7 @@
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for slayer.",
-    "version": "2.01",
+    "version": "2.02",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
         "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
