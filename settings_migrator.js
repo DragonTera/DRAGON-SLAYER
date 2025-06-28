@@ -2,7 +2,10 @@ const DefaultSettings =
 {
     "DEBUG": false,
     "ENABLE": true,
-    "KNOCKDOWN_FAST": true,
+    "SAVAGE_STRIKE_CANCEL": false,
+    "SAVAGE_STRIKE_DOUBLE": false,
+    "SAVAGE_STRIKE_CANCEL_AWSD": false,
+    "KNOCKDOWN_FAST": false,
     "FORCE_PUNISHING_BLOW": true,
     "AUTO_MEASURED_SLICE": true,
     "FORCE_HEADLONG_RUSH": true,

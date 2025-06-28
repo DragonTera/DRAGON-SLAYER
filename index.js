@@ -87,7 +87,7 @@ const BLACK_LIST            = [1, 4, 14, 20, 27, 28];
 
 const WHITE_LIST            = [11200, 11201, 11202, 11203, 21100, 21101, 21102, 21130, 31100, 31101, 31102, 31130, 40200, 40230, 50300, 60200, 81000, 81030,90800,
                                121100, 121101, 121102, 121130, 130900, 140800, 140801, 140802, 150800, 160400, 170300, 180200, 180250, 190300, 193300, 200300, 203200,
-                               210100, 230900, 230930, 240900, 240930, 260100, 260130, 270100, 270130, 270131, 280100, 280101, 280102, 280103]
+                               210100, 230900, 230930, 240900, 240930, 260100, 260130, 270100, 270130, 270131, 280100, 280101, 280102, 280103];
 
 module.exports = function slayer(mod)
 {
@@ -109,239 +109,121 @@ module.exports = function slayer(mod)
     let skillBefore = 0;
 
     let taskMs      = null;
+
+    let moving      = false;
     
     //--------------------------------------------------------------------------------------------------------------------------------------
     //  functions
     //--------------------------------------------------------------------------------------------------------------------------------------
     
-    function _pressSkill(__event, __skill, __action, __server)
+    function _SkillTarget(__event, __skill)
     {
-        if(__server == true)
+        mod.toServer('C_START_TARGETED_SKILL', 7, 
         {
-            mod.toServer('C_PRESS_SKILL', 4, 
-            {
-                skill: __skill,
-                press: __action,
-                loc: {
-                    x: __event.loc.x,
-                    y: __event.loc.y,
-                    z: __event.loc.z
-                },
-                w: __event.w,
-            });
-        }
-        else
-        {
-            mod.toClient('C_PRESS_SKILL', 4, 
-            {
-                skill: __skill,
-                press: __action,
-                loc: {
-                    x: __event.loc.x,
-                    y: __event.loc.y,
-                    z: __event.loc.z
-                },
-                w: __event.w,
-            });
-        }
+            skill: __skill,
+            w: __event.w,
+            loc: __event.loc,
+            dest: __event.dest,
+            targets: [[0, 0]],
+        });
 
         return;
     }
 
-    function _SkillTarget(__event, __skill, __server)
+    function _SkillStart(__event, __skill, __continue)
     {
-        if(__server == true)
+        mod.toServer('C_START_SKILL', 7,
         {
-            mod.toServer('C_START_TARGETED_SKILL', 7, 
-            {
-                skill: __skill,
-                w: __event.w,
-                loc: __event.loc,
-                dest: __event.dest,
-                targets: [[0, 0]],
-            });
-        }
-        else
-        {
-            mod.toClient('C_START_TARGETED_SKILL', 7,
-            {
-                skill: __skill,
-                w: __event.w,
-                loc: __event.loc,
-                dest: __event.dest,
-                targets: [[0, 0]],
-            });
-        }
-
-        return;
-    }
-
-    function _SkillStart(__event, __skill, __continue, __server)
-    {
-        if(__server == true)
-        {
-            mod.toServer('C_START_SKILL', 7,
-            {
-                skill: __skill,
-                w: __event.w,
-                loc: __event.loc,
-                dest: __event.dest,
-                unk: true,
-                moving: __event.moving,
-                continue: __continue,
-                target: __event.target,
-            });
-        }
-        else
-        {
-            mod.toClient('C_START_SKILL', 7,
-            {
-                skill: __skill,
-                w: __event.w,
-                loc: __event.loc,
-                dest: __event.dest,
-                unk: true,
-                moving: __event.moving,
-                continue: __continue,
-                target: __event.target,
-            });
-        }
-        
+            skill: __skill,
+            w: __event.w,
+            loc: __event.loc,
+            dest: __event.dest,
+            unk: true,
+            moving: __event.moving,
+            continue: __continue,
+            target: __event.target,
+        });
+    
         return;
     }
     
-    function _SkillInstance(__event, __skill, __server)
+    function _SkillInstance(__event, __skill)
     {
-        if(__server == true)
+        mod.toServer('C_START_INSTANCE_SKILL', 7, 
         {
-            mod.toServer('C_START_INSTANCE_SKILL', 7, 
-            {
-                skill: __skill,
-                loc: __event.loc,
-                w: __event.w,
-                continue: __event.continue,
-                targets: 
-                [{
-                    arrowId: 0,
-                    gameId: __event.target,
-                    hitCylinderId: 0
-                }],
-                endpoints: 
-                [{
-                    x: __event.dest.x,
-                    y: __event.dest.y,
-                    z: __event.dest.z
-                }]
-            });
-        }
-        else
-        {
-            mod.toServer('C_START_INSTANCE_SKILL', 7, 
-            {
-                skill: 
-                {
-                    reserved: 0,
-                    npc: false,
-                    type: 1,
-                    huntingZoneId: 0,
-                    id: __skill.id
-                },
-                loc: __event.loc,
-                w: __event.w,
-                continue: __event.continue,
-                targets: 
-                [{
-                    arrowId: 0,
-                    gameId: __event.target,
-                    hitCylinderId: 0
-                }],
-                endpoints: 
-                [{
-                    x: __event.dest.x,
-                    y: __event.dest.y,
-                    z: __event.dest.z
-                }]
-            });
-        }
+            skill: __skill,
+            loc: __event.loc,
+            w: __event.w,
+            continue: __event.continue,
+            targets: 
+            [{
+                arrowId: 0,
+                gameId: __event.target,
+                hitCylinderId: 0
+            }],
+            endpoints: 
+            [{
+                x: __event.dest.x,
+                y: __event.dest.y,
+                z: __event.dest.z
+            }]
+        });
         
         return;
     }
 
-    function _SkillStage(__event, __skill, __atkId, __stage, __server)
+    function _SkillStage(__event, __skill, __atkId, __stage)
     {
-        if(__server == true)
+        mod.toServer('S_ACTION_STAGE', 9, 
         {
-            mod.toServer('S_ACTION_STAGE', 9, 
-            {
-                gameId: mod.game.me.gameId,
-                loc: __event.loc,
-                w: __event.w,
-                templateId: templateId,
-                skill: __skill,
-                stage: __stage,
-                speed: mySpeed,
-                ...(mod.majorPatchVersion >= 75 ? { projectileSpeed: 1 } : 0n),
-                id: __atkId,
-                effectScale: 1.0,
-                moving: __event.moving,
-                dest: __event.dest,
-                target: 0n,
-                animSeq: [],
-            });
-        }
-        else
-        {
-            mod.toClient('S_ACTION_STAGE', 9, 
-            {
-                gameId: mod.game.me.gameId,
-                loc: __event.loc,
-                w: __event.w,
-                templateId: templateId,
-                skill: __skill,
-                stage: __stage,
-                speed: mySpeed,
-                ...(mod.majorPatchVersion >= 75 ? { projectileSpeed: 1 } : 0n),
-                id: __atkId,
-                effectScale: 1.0,
-                moving: __event.moving,
-                dest: __event.dest,
-                target: 0n,
-                animSeq: [],
-            });
-        }
+            gameId: mod.game.me.gameId,
+            loc: __event.loc,
+            w: __event.w,
+            templateId: templateId,
+            skill: __skill,
+            stage: __stage,
+            speed: mySpeed,
+            ...(mod.majorPatchVersion >= 75 ? { projectileSpeed: 1 } : 0n),
+            id: __atkId,
+            effectScale: 1.0,
+            moving: __event.moving,
+            dest: __event.dest,
+            target: 0n,
+            animSeq: [],
+        });
 
         return;
     }
 
-    function _SkillEnd(__event, __atkId, __type, __server)
+    function _SkillEnd(__event, __atkId, __type)
     {
-        if(__server == true)
+        mod.toServer('S_ACTION_END', 5, 
         {
-            mod.toServer('S_ACTION_END', 5, 
-            {
-                gameId: mod.game.me.gameId,
-                loc: __event.loc,
-                w: __event.w,
-                templateId: templateId,
-                skill: __event.skill,
-                type: __type,
-                id: __atkId,
-            });
-        }
-        else
-        {
-            mod.toClient('S_ACTION_END', 5, 
-            {
-                gameId: mod.game.me.gameId,
-                loc: __event.loc,
-                w: __event.w,
-                templateId: templateId,
-                skill: __event.skill,
-                type: __type,
-                id: __atkId,
-            });
-        }
+            gameId: mod.game.me.gameId,
+            loc: __event.loc,
+            w: __event.w,
+            templateId: templateId,
+            skill: __event.skill,
+            type: __type,
+            id: __atkId,
+        });
+        
+        return;
+    }
 
+    function _SkillEndClient(__event, __atkId, __type)
+    {
+        mod.toClient('S_ACTION_END', 5, 
+        {
+            gameId: mod.game.me.gameId,
+            loc: __event.loc,
+            w: __event.w,
+            templateId: templateId,
+            skill: __event.skill,
+            type: __type,
+            id: __atkId,
+        });
+        
         return;
     }
 
@@ -455,6 +337,8 @@ module.exports = function slayer(mod)
 
         skillFinish[Math.floor(event.skill.id / 10000)] = false;
 
+        moving = event.moving;
+        
         if(event.skill.id != S_OVERPOWER_0 && event.skill.id != S_OVERPOWER_1 && mod.settings.OVERPOWER_NOTIFY == true)
         {
             let __wisper = true;
@@ -477,15 +361,15 @@ module.exports = function slayer(mod)
             {
                 let __event = event;
                 __event.skill.id = S_KNOCKDOWN_STRIKE_3;
-                _SkillInstance(__event, __event.skill, true);
+                _SkillInstance(__event, __event.skill);
             }
         }
         else if(event.skill.id == S_WHIRLWIND_0 || event.skill.id == S_WHIRLWIND_1 || event.skill.id == S_WHIRLWIND_2 || event.skill.id == S_WHIRLWIND_3)
         {
             if(skillCd[Math.floor(S_HEADLONG_RUSH / 10000)] == false && mod.settings.FORCE_HEADLONG_RUSH == true)
             {
-                _SkillTarget(event, S_HEADLONG_RUSH, true);
-                setTimeout(function (){_SkillStart(event, event.skill.id, true, true);}, 50 / mySpeed);
+                _SkillTarget(event, S_HEADLONG_RUSH);
+                setTimeout(function (){_SkillStart(event, event.skill.id, true);}, 50 / mySpeed);
             }
         }
         else if(event.skill.id == S_OVERHAND_STRIKE_0 || event.skill.id == S_OVERHAND_STRIKE_1)
@@ -494,7 +378,7 @@ module.exports = function slayer(mod)
             {
                 let __event      = event;
                 __event.skill.id = S_OVERHAND_STRIKE_1;
-                _SkillInstance(__event, __event.skill, true);
+                _SkillInstance(__event, __event.skill);
             }
             else
             {
@@ -502,9 +386,9 @@ module.exports = function slayer(mod)
                 
                 if(atkIdBase < 100){atkIdBase = 0xFEFEFFEE;}
 
-                _SkillStart(event, S_OVERHAND_STRIKE_0, true, true);
-                _SkillStage(event, S_OVERHAND_STRIKE_1, atkIdBase, 0, true);
-                _SkillEnd(event, atkIdBase, 4, true);
+                _SkillStart(event, S_OVERHAND_STRIKE_0, true);
+                _SkillStage(event, S_OVERHAND_STRIKE_1, atkIdBase, 0);
+                _SkillEnd(event, atkIdBase, 4);
             }
         }
         else if(event.skill.id == S_MEASURED_SLICE_0 || event.skill.id == S_MEASURED_SLICE_1)
@@ -516,7 +400,7 @@ module.exports = function slayer(mod)
                 let __event      = event;
                 __event.skill.id = S_PUNISHING_BLOW_0;
 
-                _SkillStart(__event, __event.skill, true, true);
+                _SkillStart(__event, __event.skill, true);
                 
                 if(mod.settings.AUTO_MEASURED_SLICE == true)
                 {
@@ -531,7 +415,7 @@ module.exports = function slayer(mod)
                         else if(skillCd[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == true)
                         {
                             __event.skill.id = S_MEASURED_SLICE_0;
-                            _SkillStart(__event, __event.skill, true, true);
+                            _SkillStart(__event, __event.skill, true);
                         }
                     }, 20);
                 }
@@ -540,7 +424,7 @@ module.exports = function slayer(mod)
             {   
                 let __event      = event;
                 __event.skill.id = S_MEASURED_SLICE_1;
-                _SkillInstance(__event, __event.skill, true);
+                _SkillInstance(__event, __event.skill);
             }
         }
         else if(event.skill.id == S_EVISCERATE_0 || event.skill.id == S_EVISCERATE_1)
@@ -549,7 +433,7 @@ module.exports = function slayer(mod)
             {   
                 let __event      = event;
                 __event.skill.id = S_EVISCERATE_1;
-                _SkillInstance(__event, __event.skill, true);
+                _SkillInstance(__event, __event.skill);
             }
         }
         else if(event.skill.id == S_PUNISHING_BLOW_0 || event.skill.id == S_PUNISHING_BLOW_1)
@@ -558,7 +442,7 @@ module.exports = function slayer(mod)
             {   
                 let __event      = event;
                 __event.skill.id = S_PUNISHING_BLOW_1;
-                _SkillInstance(__event, __event.skill, true);
+                _SkillInstance(__event, __event.skill);
             }
         }
         else if(event.skill.id == S_SAVAGE_STRIKE_0)
@@ -572,7 +456,7 @@ module.exports = function slayer(mod)
         }
         else if(BLACK_LIST.includes(Math.floor(event.skill.id / 10000)) == false)
         {
-            _SkillInstance(event, event.skill, true);
+            _SkillInstance(event, event.skill);
         }
         
         skillBefore = Math.floor(event.skill.id / 10000);
@@ -602,6 +486,30 @@ module.exports = function slayer(mod)
         if(mod.game.me.gameId != event.gameId || job != JOB_SLAYER){return;}
         if(mod.settings.DEBUG){console.log(TAG + 'S_ACTION_STAGE: ' + event.skill.id + ' | ' + event.stage);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
+
+        if(event.skill.id == S_SAVAGE_STRIKE_0 || event.skill.id == S_SAVAGE_STRIKE_1 || event.skill.id == S_SAVAGE_STRIKE_2)
+        {
+            if(mod.settings.SAVAGE_STRIKE_CANCEL_AWSD == true && moving == true)
+            {
+                return;
+            }
+            else if(mod.settings.SAVAGE_STRIKE_CANCEL == true)
+            {
+                _SkillEndClient(event, event.id, 4);
+            }
+            else if(mod.settings.SAVAGE_STRIKE_DOUBLE == true && (event.skill.id == S_SAVAGE_STRIKE_0 || event.skill.id == S_SAVAGE_STRIKE_1))
+            {
+                let __event     = event;
+                __event.loc     = playerLoc;
+                __event.skill   = S_SAVAGE_STRIKE_0;
+                __event.w       = __event.w > 0 ? __event.w - Math.PI : __event.w + Math.PI;
+
+                setTimeout(function ()
+                {
+                    _SkillStart(__event, __event.skill, true);
+                }, 200 / mySpeed);
+            }
+        }
 
         return;
     });
@@ -633,7 +541,7 @@ module.exports = function slayer(mod)
     let ui = null;
     if(global.TeraProxy.GUIMode)
     {
-        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: 320, width: 700});
+        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: 320, width: 720});
         
         ui.on('update', settings => 
         {

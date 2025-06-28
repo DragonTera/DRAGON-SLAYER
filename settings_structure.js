@@ -5,6 +5,21 @@ module.exports = [
         "type": "bool"
     },
     {
+        "key": "SAVAGE_STRIKE_CANCEL",
+        "name": "Enable Savage Strike cancel:",
+        "type": "bool"
+    },
+    {
+        "key": "SAVAGE_STRIKE_DOUBLE",
+        "name": "Enable double Savage Strike (Savage Strike cancel off):",
+        "type": "bool"
+    },
+    {
+        "key": "SAVAGE_STRIKE_CANCEL_AWSD",
+        "name": "Desable Savage Strike cancel / double while moving:",
+        "type": "bool"
+    },
+    {
         "key": "KNOCKDOWN_FAST",
         "name": "Enable fast Knockdown Strike:",
         "type": "bool"
