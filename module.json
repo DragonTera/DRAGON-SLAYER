@@ -3,7 +3,7 @@
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for lancer.",
-    "version": "1.01",
+    "version": "1.02",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
         "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",

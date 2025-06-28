@@ -56,8 +56,8 @@ const S_OVERPOWER_1         = 180250;
 const S_TENACITY_0          = 190300;
 const S_TENACITY_1          = 193300;   //IMORTAL
 
-const S_IN_COLD_BLOOD_0     = 200300;
-const S_IN_COLD_BLOOD_1     = 203200;
+const S_IN_COLD_BLOOD_0     = 200300;   //BLACK LIST
+const S_IN_COLD_BLOOD_1     = 203200;   //BLACK LIST
 
 const S_EXHAUSTING_BLOW     = 210100;
 
@@ -83,7 +83,7 @@ const OVERHAND_STRIKE_CHAIN = [2, 3, 9, 12, 13, 15, 16, 24];
 const EVISCERATE_CHAIN      = [2, 3, 8, 9, 12, 13, 15];
 const MEASURED_SLICE_CHAIN  = [8, 24, 26];
 const PUNISHING_BLOW_CHAIN  = [8, 23, 24, 27];
-const BLACK_LIST            = [1, 4, 14, 27, 28];
+const BLACK_LIST            = [1, 4, 14, 20, 27, 28];
 
 const WHITE_LIST            = [11200, 11201, 11202, 11203, 21100, 21101, 21102, 21130, 31100, 31101, 31102, 31130, 40200, 40230, 50300, 60200, 81000, 81030,90800,
                                121100, 121101, 121102, 121130, 130900, 140800, 140801, 140802, 150800, 160400, 170300, 180200, 180250, 190300, 193300, 200300, 203200,
@@ -570,7 +570,7 @@ module.exports = function slayer(mod)
                 taskSkillCd[Math.floor(S_HEADLONG_RUSH / 10000)] = setTimeout(function (){skillCd[Math.floor(S_HEADLONG_RUSH / 10000)] = false;}, 1000);
             }
         }
-        else if(BLACK_LIST.includes(event.skill.id) == false)
+        else if(BLACK_LIST.includes(Math.floor(event.skill.id / 10000)) == false)
         {
             _SkillInstance(event, event.skill, true);
         }
