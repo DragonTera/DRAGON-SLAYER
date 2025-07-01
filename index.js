@@ -4,6 +4,8 @@ const SettingsUI = require('tera-mod-ui').Settings;
 
 const TAG = "<font color='#04ACEC'>DRAGON-SLAYER:</font> ";
 
+const DEBUG                 = false;
+
 const JOB_SLAYER            = 2;
 
 const S_COMBO_ATTACK_0      = 11200;    //BLACK LIST
@@ -93,22 +95,25 @@ module.exports = function slayer(mod)
 {
     mod.game.initialize(['me', 'me.abnormalities']);
 
-    let job         = null;
-    let templateId  = null;
+    let job         = (mod.game.me.templateId - 10101) % 100;
     let playerLoc   = null;
     let playerDest  = null;
     let playerW     = null;
+    
+    let reload      = false;
 
     let mySpeed     = null;
 
     let atkIdBase   = 0xFEFEFFEE;
-
     let skillFinish = [];
     let skillCd     = [];
+    let skillLock   = [];
+    let taskLock    = [];
     let taskSkillCd = [];
     let skillBefore = 0;
 
     let taskMs      = null;
+    let taskWw      = null;
 
     let moving      = false;
     
@@ -146,6 +151,16 @@ module.exports = function slayer(mod)
     
         return;
     }
+
+    function _SkillCannotStart(__skill)
+    {
+        mod.send('S_CANNOT_START_SKILL', 4,
+        {
+            skill: __skill
+        });
+    
+        return;
+    }
     
     function _SkillInstance(__event, __skill)
     {
@@ -179,7 +194,7 @@ module.exports = function slayer(mod)
             gameId: mod.game.me.gameId,
             loc: __event.loc,
             w: __event.w,
-            templateId: templateId,
+            templateId: mod.game.me.templateId,
             skill: __skill,
             stage: __stage,
             speed: mySpeed,
@@ -202,23 +217,7 @@ module.exports = function slayer(mod)
             gameId: mod.game.me.gameId,
             loc: __event.loc,
             w: __event.w,
-            templateId: templateId,
-            skill: __event.skill,
-            type: __type,
-            id: __atkId,
-        });
-        
-        return;
-    }
-
-    function _SkillEndClient(__event, __atkId, __type)
-    {
-        mod.toClient('S_ACTION_END', 5, 
-        {
-            gameId: mod.game.me.gameId,
-            loc: __event.loc,
-            w: __event.w,
-            templateId: templateId,
+            templateId: mod.game.me.templateId,
             skill: __event.skill,
             type: __type,
             id: __atkId,
@@ -237,8 +236,33 @@ module.exports = function slayer(mod)
             founder: 0,
             name: "DRAGON_SLAYER",
             recipient: mod.game.me.name,
-            message: "Overpoer is not active.",
+            message: "Overpower is not active.",
         });
+
+        return;
+    }
+
+    function _SkillNumber(__id)
+    {
+        return Math.floor(__id / 10000);
+    }
+
+    function _SkillReset()
+    {
+        for(let __i = 0; __i < 50; __i++)
+        {
+            clearInterval(taskSkillCd[__i]);
+            clearInterval(taskLock[__i]);
+            skillFinish[__i] = true;
+            skillCd[__i]     = false;
+            skillLock[__i]   = false;
+            taskLock[__i]    = null;
+            taskSkillCd[__i] = null;
+        }
+
+        clearInterval(taskMs);
+        clearInterval(taskWw);
+        skillBefore = 0;
 
         return;
     }
@@ -247,35 +271,33 @@ module.exports = function slayer(mod)
     //  Player event
     //--------------------------------------------------------------------------------------------------------------------------------------
 
-    mod.hook('S_LOGIN', mod.majorPatchVersion < 114 ? 14 : 15, (event) => 
+    mod.hook('S_LOGIN', mod.majorPatchVersion < 114 ? 14 : 15, {order: -Infinity}, (event) => 
     {
-        templateId  = event.templateId;
-        job         = (templateId -10101) % 100;
-
-        if(job != JOB_SLAYER){return;}
+        job = (mod.game.me.templateId - 10101) % 100;
         
-        setTimeout(function (){mod.command.message('This mod does not work with NGSP, SP or any skill prediction / ping remover.');}, 10000);
-
-        for(let __i = 0; __i < 50; __i++)
-        {
-            skillFinish[__i]    = true;
-            skillCd[__i]        = false;
-            taskSkillCd[__i]    = null;
-        }
+        _SkillReset();
+        reload = true;
         
-        skillBefore = 0;
-
         return;
     });
 
-    mod.hook("C_PLAYER_LOCATION", 5, event =>
+    mod.hook("C_PLAYER_LOCATION", 5, {order: -Infinity}, event =>
     {
+        job         = (mod.game.me.templateId - 10101) % 100;
 		playerLoc   = event.loc;
 		playerW     = event.w;
         playerDest  = event.dest;
+
+        if(reload == false)
+        {
+            _SkillReset();
+            reload = true;
+        }
+
+        return;
 	});
 
-    mod.hook('S_PLAYER_STAT_UPDATE', mod.majorPatchVersion < 105 ? 14 : (mod.majorPatchVersion < 108 ? 15 : 17), (event) =>
+    mod.hook('S_PLAYER_STAT_UPDATE', mod.majorPatchVersion < 105 ? 14 : (mod.majorPatchVersion < 108 ? 15 : 17), {order: -Infinity}, (event) =>
     {
         if(job != JOB_SLAYER || mod.settings.ENABLE == false){return;}
 
@@ -286,40 +308,37 @@ module.exports = function slayer(mod)
 
     mod.game.on('leave_game', () => 
     {
-        for(let __i = 0; __i < 50; __i++)
-        {
-            clearInterval(taskSkillCd[__i]);
-        }
+        _SkillReset();
 
-        clearInterval(taskMs);
+        return;
     });
     
     //--------------------------------------------------------------------------------------------------------------------------------------
     //  Cooldown skills event
     //--------------------------------------------------------------------------------------------------------------------------------------
 
-    mod.hook('S_START_COOLTIME_SKILL', mod.majorPatchVersion < 114 ? 3 : 4, (event) =>
+    mod.hook('S_START_COOLTIME_SKILL', mod.majorPatchVersion < 114 ? 3 : 4, {order: -Infinity}, (event) =>
     {
         if(job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'S_START_COOLTIME_SKILL: ' + event.skill.id + ' / ' + event.cooldown + ' | ' + Math.floor(event.skill.id / 10000));}
+        if(DEBUG == true){console.log(TAG + 'S_START_COOLTIME_SKILL: ' + event.skill.id + ' / ' + event.cooldown);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
-        skillCd[Math.floor(event.skill.id / 10000)] = true;
-        clearInterval(taskSkillCd[Math.floor(event.skill.id / 10000)]);
-        taskSkillCd[Math.floor(event.skill.id / 10000)] = setTimeout(function (){skillCd[Math.floor(event.skill.id / 10000)] = false;}, event.cooldown);
+        skillCd[_SkillNumber(event.skill.id)] = true;
+        clearInterval(taskSkillCd[_SkillNumber(event.skill.id)]);
+        taskSkillCd[_SkillNumber(event.skill.id)] = setTimeout(function (){skillCd[_SkillNumber(event.skill.id)] = false;}, event.cooldown);
 
         return;
 	});
 
-    mod.hook('S_DECREASE_COOLTIME_SKILL', 3, (event) => 
+    mod.hook('S_DECREASE_COOLTIME_SKILL', 3, {order: -Infinity}, (event) => 
     {
         if(job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'S_DECREASE_COOLTIME_SKILL: ' + event.skill.id + ' / ' + event.cooldown + ' | ' + Math.floor(event.skill.id / 10000));}
+        if(DEBUG == true){console.log(TAG + 'S_DECREASE_COOLTIME_SKILL: ' + event.skill.id + ' / ' + event.cooldown);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
-        skillCd[Math.floor(event.skill.id / 10000)] = true;
-        clearInterval(taskSkillCd[Math.floor(event.skill.id / 10000)]);
-        taskSkillCd[Math.floor(event.skill.id / 10000)] = setTimeout(function (){skillCd[Math.floor(event.skill.id / 10000)] = false;}, event.cooldown);
+        skillCd[_SkillNumber(event.skill.id)] = true;
+        clearInterval(taskSkillCd[_SkillNumber(event.skill.id)]);
+        taskSkillCd[_SkillNumber(event.skill.id)] = setTimeout(function (){skillCd[_SkillNumber(event.skill.id)] = false;}, event.cooldown);
 
         return;
 	});
@@ -328,18 +347,18 @@ module.exports = function slayer(mod)
     //  Use skills event
     //--------------------------------------------------------------------------------------------------------------------------------------
 
-    mod.hook('C_START_SKILL', 7, (event) =>
+    mod.hook('C_START_SKILL', 7, {order: -Infinity}, (event) =>
     {
         if(job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'C_START_SKILL: ' + event.skill.id + ' | ' + event.continue + ' | ' + event.unk + ' | ' + event.skill.npc);}
+        if(DEBUG == true){console.log(TAG + 'C_START_SKILL: ' + event.skill.id);}
         if(mod.settings.ENABLE == false){return;}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
-        skillFinish[Math.floor(event.skill.id / 10000)] = false;
+        skillFinish[_SkillNumber(event.skill.id)] = false;
 
         moving = event.moving;
         
-        if(event.skill.id != S_OVERPOWER_0 && event.skill.id != S_OVERPOWER_1 && mod.settings.OVERPOWER_NOTIFY == true)
+        if(_SkillNumber(event.skill.id) != _SkillNumber(S_OVERPOWER_0) && mod.settings.OVERPOWER_NOTIFY == true)
         {
             let __wisper = true;
 
@@ -355,8 +374,28 @@ module.exports = function slayer(mod)
             if(__wisper == true){_Wisper();}
         }
 
-        if(event.skill.id == S_KNOCKDOWN_STRIKE_0 || event.skill.id == S_KNOCKDOWN_STRIKE_1 || event.skill.id == S_KNOCKDOWN_STRIKE_2 || event.skill.id == S_KNOCKDOWN_STRIKE_3)
+        if(skillLock.includes(true) == true)
         {
+            if(_SkillNumber(event.skill.id) == _SkillNumber(S_EVASIVE_ROLL_0))
+            {
+                for(let __i = 0; __i < 50; __i++)
+                {
+                    clearInterval(taskLock[__i]);
+                    skillLock[__i] = false;
+                }
+            }
+            else
+            {
+                _SkillCannotStart(event.skill);
+                return false;
+            }
+        }
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_KNOCKDOWN_STRIKE_0))
+        {
+            skillLock[_SkillNumber(event.skill.id)] = true;
+            clearInterval(taskLock[_SkillNumber(event.skill.id)]);
+            taskLock[_SkillNumber(event.skill.id)] = setTimeout(function (){skillLock[_SkillNumber(event.skill.id)] = false;}, mod.settings.KNOCKDOWN_LOCK_DELAY / mySpeed);
+
             if(mod.settings.KNOCKDOWN_FAST == true)
             {
                 let __event = event;
@@ -364,16 +403,58 @@ module.exports = function slayer(mod)
                 _SkillInstance(__event, __event.skill);
             }
         }
-        else if(event.skill.id == S_WHIRLWIND_0 || event.skill.id == S_WHIRLWIND_1 || event.skill.id == S_WHIRLWIND_2 || event.skill.id == S_WHIRLWIND_3)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_WHIRLWIND_0))
         {
             if(skillCd[Math.floor(S_HEADLONG_RUSH / 10000)] == false && mod.settings.FORCE_HEADLONG_RUSH == true)
             {
-                _SkillTarget(event, S_HEADLONG_RUSH);
-                setTimeout(function (){_SkillStart(event, event.skill.id, true);}, 50 / mySpeed);
+                _SkillCannotStart(event.skill);
+
+                setTimeout(function ()
+                {
+                    _SkillTarget(event, S_HEADLONG_RUSH);
+
+                    setTimeout(function ()
+                    {
+                        setTimeout(function ()
+                        {
+                            if(mod.settings.AUTO_MEASURED_SLICE == true)
+                            {
+                                clearInterval(taskWw);
+                                taskWw = setInterval(function ()
+                                {
+                                    if(skillFinish[Math.floor(S_HEADLONG_RUSH / 10000)] == true || skillFinish[Math.floor(S_WHIRLWIND_0 / 10000)] == true)
+                                    {
+                                        skillLock[_SkillNumber(event.skill.id)] = true;
+                                        clearInterval(taskLock[_SkillNumber(event.skill.id)]);
+                                        taskLock[_SkillNumber(event.skill.id)] = setTimeout(function (){skillLock[_SkillNumber(event.skill.id)] = false;}, mod.settings.WHIRLWIND_LOCK_DELAY / mySpeed);
+
+                                        clearInterval(taskWw);
+                                        return;
+                                    }
+                                    else if(skillCd[Math.floor(S_HEADLONG_RUSH / 10000)] == true)
+                                    {
+                                        _SkillStart(event, event.skill, true);
+                                    }
+                                }, 20);
+                            }
+                        }, 10);
+                    }, 50 / mySpeed);
+                }, 10);
+                return false;
+            }
+            else
+            {
+                skillLock[_SkillNumber(event.skill.id)] = true;
+                clearInterval(taskLock[_SkillNumber(event.skill.id)]);
+                taskLock[_SkillNumber(event.skill.id)] = setTimeout(function (){skillLock[_SkillNumber(event.skill.id)] = false;}, mod.settings.WHIRLWIND_LOCK_DELAY / mySpeed);
             }
         }
-        else if(event.skill.id == S_OVERHAND_STRIKE_0 || event.skill.id == S_OVERHAND_STRIKE_1)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_OVERHAND_STRIKE_0))
         {
+            skillLock[_SkillNumber(event.skill.id)] = true;
+            clearInterval(taskLock[_SkillNumber(event.skill.id)]);
+            taskLock[_SkillNumber(event.skill.id)] = setTimeout(function (){skillLock[_SkillNumber(event.skill.id)] = false;}, mod.settings.OVERHAND_LOCK_DELAY / mySpeed);
+
             if(OVERHAND_STRIKE_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
             {
                 let __event      = event;
@@ -391,34 +472,41 @@ module.exports = function slayer(mod)
                 _SkillEnd(event, atkIdBase, 4);
             }
         }
-        else if(event.skill.id == S_MEASURED_SLICE_0 || event.skill.id == S_MEASURED_SLICE_1)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_MEASURED_SLICE_0))
         {
             if(skillCd[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == false && mod.settings.FORCE_PUNISHING_BLOW == true)
             {
                 skillFinish[Math.floor(S_PUNISHING_BLOW_0 / 10000)] = false;
-                
-                let __event      = event;
-                __event.skill.id = S_PUNISHING_BLOW_0;
 
-                _SkillStart(__event, __event.skill, true);
-                
-                if(mod.settings.AUTO_MEASURED_SLICE == true)
+                _SkillCannotStart(event.skill);
+
+                setTimeout(function ()
                 {
-                    clearInterval(taskMs);
-                    taskMs = setInterval(function ()
+                    let __event      = event;
+                    __event.skill.id = S_PUNISHING_BLOW_0;
+
+                    _SkillStart(__event, __event.skill, true);
+                    
+                    if(mod.settings.AUTO_MEASURED_SLICE == true)
                     {
-                        if(skillFinish[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == true || skillFinish[Math.floor(S_MEASURED_SLICE_0 / 10000)] == true)
+                        clearInterval(taskMs);
+                        taskMs = setInterval(function ()
                         {
-                            clearInterval(taskMs);
-                            return;
-                        }
-                        else if(skillCd[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == true)
-                        {
-                            __event.skill.id = S_MEASURED_SLICE_0;
-                            _SkillStart(__event, __event.skill, true);
-                        }
-                    }, 20);
-                }
+                            if(skillFinish[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == true || skillFinish[Math.floor(S_MEASURED_SLICE_0 / 10000)] == true)
+                            {
+                                clearInterval(taskMs);
+                                return;
+                            }
+                            else if(skillCd[Math.floor(S_PUNISHING_BLOW_0 / 10000)] == true)
+                            {
+                                __event.skill.id = S_MEASURED_SLICE_0;
+                                _SkillStart(__event, __event.skill, true);
+                            }
+                        }, 20);
+                    }
+                }, 10);
+
+                return false;
             }
             else if(MEASURED_SLICE_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
             {   
@@ -427,7 +515,7 @@ module.exports = function slayer(mod)
                 _SkillInstance(__event, __event.skill);
             }
         }
-        else if(event.skill.id == S_EVISCERATE_0 || event.skill.id == S_EVISCERATE_1)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_EVISCERATE_0))
         {
             if(EVISCERATE_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
             {   
@@ -436,7 +524,7 @@ module.exports = function slayer(mod)
                 _SkillInstance(__event, __event.skill);
             }
         }
-        else if(event.skill.id == S_PUNISHING_BLOW_0 || event.skill.id == S_PUNISHING_BLOW_1)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_PUNISHING_BLOW_0))
         {
             if(PUNISHING_BLOW_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
             {   
@@ -454,48 +542,50 @@ module.exports = function slayer(mod)
                 taskSkillCd[Math.floor(S_HEADLONG_RUSH / 10000)] = setTimeout(function (){skillCd[Math.floor(S_HEADLONG_RUSH / 10000)] = false;}, 1000);
             }
         }
-        else if(BLACK_LIST.includes(Math.floor(event.skill.id / 10000)) == false)
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_HEART_THRUST_0))
+        {
+            skillLock[_SkillNumber(event.skill.id)] = true;
+            clearInterval(taskLock[_SkillNumber(event.skill.id)]);
+            taskLock[_SkillNumber(event.skill.id)] = setTimeout(function (){skillLock[_SkillNumber(event.skill.id)] = false;}, mod.settings.HEART_THRUST_LOCK_DELAY / mySpeed);
+        }
+        else if(BLACK_LIST.includes(_SkillNumber(event.skill.id)) == false)
         {
             _SkillInstance(event, event.skill);
         }
         
-        skillBefore = Math.floor(event.skill.id / 10000);
+        skillBefore = _SkillNumber(event.skill.id);
         return;
     });
 
-    mod.hook('C_PRESS_SKILL', 4, (event) => 
+    mod.hook('C_PRESS_SKILL', 4, {order: -Infinity}, (event) => 
     {
         if(job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'C_PRESS_SKILL: ' + event.skill.id);}
+        if(DEBUG == true){console.log(TAG + 'C_PRESS_SKILL: ' + event.skill.id);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
         return;
 	});
 
-    mod.hook('C_START_INSTANCE_SKILL', 7, (event) =>
+    mod.hook('C_START_INSTANCE_SKILL', 7, {order: -Infinity}, (event) =>
     {
         if(job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'C_START_INSTANCE_SKILL: ' + event.skill.id);}
+        if(DEBUG == true){console.log(TAG + 'C_START_INSTANCE_SKILL: ' + event.skill.id);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
         return;
     });
 
-    mod.hook('S_ACTION_STAGE', 9, (event) =>
+    mod.hook('S_ACTION_STAGE', 9, {order: -Infinity}, (event) =>
     {
         if(mod.game.me.gameId != event.gameId || job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'S_ACTION_STAGE: ' + event.skill.id + ' | ' + event.stage);}
+        if(DEBUG == true){console.log(TAG + 'S_ACTION_STAGE: ' + event.skill.id + ' | ' + event.stage);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
-        if(event.skill.id == S_SAVAGE_STRIKE_0 || event.skill.id == S_SAVAGE_STRIKE_1 || event.skill.id == S_SAVAGE_STRIKE_2)
+        if(_SkillNumber(event.skill.id) == _SkillNumber(S_SAVAGE_STRIKE_0))
         {
             if(mod.settings.SAVAGE_STRIKE_CANCEL_AWSD == true && moving == true)
             {
-                return;
-            }
-            else if(mod.settings.SAVAGE_STRIKE_CANCEL == true)
-            {
-                _SkillEndClient(event, event.id, 4);
+                return true;
             }
             else if(mod.settings.SAVAGE_STRIKE_DOUBLE == true && (event.skill.id == S_SAVAGE_STRIKE_0 || event.skill.id == S_SAVAGE_STRIKE_1))
             {
@@ -518,13 +608,13 @@ module.exports = function slayer(mod)
     //  End skills event
     //--------------------------------------------------------------------------------------------------------------------------------------
 
-    mod.hook('S_ACTION_END', 5, (event) =>
+    mod.hook('S_ACTION_END', 5, {order: -Infinity}, (event) =>
     {
         if(mod.game.me.gameId != event.gameId || job != JOB_SLAYER){return;}
-        if(mod.settings.DEBUG){console.log(TAG + 'S_ACTION_END: ' + event.skill.id + ' | ' + event.type + ' | ' + event.id);}
+        if(DEBUG == true){console.log(TAG + 'S_ACTION_END: ' + event.skill.id + ' | ' + event.type + ' | ' + event.id);}
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
-        skillFinish[Math.floor(event.skill.id / 10000)] = true;
+        skillFinish[_SkillNumber(event.skill.id)] = true;
 
         return;
     });
@@ -536,12 +626,14 @@ module.exports = function slayer(mod)
     mod.command.add(['slayer'], () =>
     {
         if(ui){ui.show();}
+
+        return;
     });
 
     let ui = null;
     if(global.TeraProxy.GUIMode)
     {
-        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: 355, width: 720});
+        ui = new SettingsUI(mod, require('./settings_structure'), mod.settings, {height: require('./settings_structure').length * 35, width: 735});
         
         ui.on('update', settings => 
         {

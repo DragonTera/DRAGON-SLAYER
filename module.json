@@ -3,12 +3,13 @@
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for slayer.",
-    "version": "2.02",
+    "version": "3.00",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
+        "reloadable": true,
         "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
         "guiName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
-        "settingsVersion": 2.01,
+        "settingsVersion": 3.00,
         "settingsFile": "config.json",
         "settingsMigrator": "settings_migrator.js"
     }
