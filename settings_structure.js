@@ -43,7 +43,7 @@ module.exports = [
     },
     {
         "key": "SAVAGE_STRIKE_CANCEL_AWSD",
-        "name": "Desable double Savage Strike while moving:",
+        "name": "Disable double Savage Strike while moving:",
         "type": "bool"
     },
     {
