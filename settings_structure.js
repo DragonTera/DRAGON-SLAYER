@@ -5,45 +5,18 @@ module.exports = [
         "type": "bool"
     },
     {
-        "key": "KNOCKDOWN_LOCK_DELAY",
-        "name": "Knockdown Strike locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "WHIRLWIND_LOCK_DELAY",
-        "name": "Whirlwind locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "HEART_THRUST_LOCK_DELAY",
-        "name": "Heart Thrust locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "OVERHAND_LOCK_DELAY",
-        "name": "Overhand Strike locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
+        "key": "SAVAGE_STRIKE_CANCEL",
+        "name": "Enable Savage Strike cancel:",
+        "type": "bool"
     },
     {
         "key": "SAVAGE_STRIKE_DOUBLE",
-        "name": "Enable double Savage Strike:",
+        "name": "Enable double Savage Strike (Savage Strike cancel off):",
         "type": "bool"
     },
     {
         "key": "SAVAGE_STRIKE_CANCEL_AWSD",
-        "name": "Disable double Savage Strike while moving:",
+        "name": "Desable Savage Strike cancel / double while moving:",
         "type": "bool"
     },
     {

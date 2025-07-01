@@ -1,15 +1,14 @@
 {
-    "disableAutoUpdate": false,
+    "disableAutoUpdate": true,
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for slayer.",
-    "version": "3.00",
+    "version": "1.00",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
-        "reloadable": true,
         "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
         "guiName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
-        "settingsVersion": 3.00,
+        "settingsVersion": 1.00,
         "settingsFile": "config.json",
         "settingsMigrator": "settings_migrator.js"
     }
