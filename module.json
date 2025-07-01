@@ -1,15 +1,15 @@
 {
     "disableAutoUpdate": false,
-    "name": "DRAGON-SLAYER",
+    "name": "DRAGON-SLAYER-INSTANCE",
     "author": "Dragon",
     "description": "Generic script for slayer.",
-    "version": "3.00",
-    "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
+    "version": "1.00",
+    "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/INSTANCE/"],
     "options": {
         "reloadable": true,
-        "niceName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
-        "guiName": "<font color='#04ACEC'>DRAGON-SLAYER</font>",
-        "settingsVersion": 3.00,
+        "niceName": "<font color='#FF0000'>DRAGON-SLAYER-INSTANCE</font>",
+        "guiName": "<font color='#FF0000'>DRAGON-SLAYER-INSTANCE</font>",
+        "settingsVersion": 1.00,
         "settingsFile": "config.json",
         "settingsMigrator": "settings_migrator.js"
     }

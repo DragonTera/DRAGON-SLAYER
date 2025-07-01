@@ -3,7 +3,7 @@ Type `/toolbox` or `/8` into chat to switch to the command line, then enter the 
 
 ## Command
 
-/toolbox slayer
+/toolbox slayer-instance
 
 ## Functions
 
