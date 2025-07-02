@@ -1,14 +1,10 @@
 const DefaultSettings = 
 {
     "ENABLE": true,
-    "KNOCKDOWN_LOCK_DELAY": 1000,
-    "WHIRLWIND_LOCK_DELAY": 1425,
-    "HEART_THRUST_LOCK_DELAY": 980,
-    "OVERHAND_LOCK_DELAY": 250,
+    "OVERHAND": true,
     "SAVAGE_STRIKE_DOUBLE": false,
     "SAVAGE_STRIKE_CANCEL_AWSD": true,
     "SAVAGE_STRIKE_DELAY": 200,
-    "KNOCKDOWN_FAST": true,
     "FORCE_PUNISHING_BLOW": true,
     "AUTO_MEASURED_SLICE": true,
     "FORCE_HEADLONG_RUSH": true,

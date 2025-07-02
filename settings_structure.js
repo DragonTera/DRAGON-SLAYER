@@ -5,36 +5,9 @@ module.exports = [
         "type": "bool"
     },
     {
-        "key": "KNOCKDOWN_LOCK_DELAY",
-        "name": "Knockdown Strike locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "WHIRLWIND_LOCK_DELAY",
-        "name": "Whirlwind locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "HEART_THRUST_LOCK_DELAY",
-        "name": "Heart Thrust locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
-    },
-    {
-        "key": "OVERHAND_LOCK_DELAY",
-        "name": "Overhand Strike locked animation time:",
-        "type": "number",
-        "min": 0,
-        "max": 5000,
-        "step": 1
+        "key": "OVERHAND",
+        "name": "Enable Overhand Strike emulation:",
+        "type": "bool"
     },
     {
         "key": "SAVAGE_STRIKE_DOUBLE",
@@ -53,11 +26,6 @@ module.exports = [
         "min": 100,
         "max": 1000,
         "step": 1
-    },
-    {
-        "key": "KNOCKDOWN_FAST",
-        "name": "Enable fast Knockdown Strike:",
-        "type": "bool"
     },
     {
         "key": "FORCE_PUNISHING_BLOW",
