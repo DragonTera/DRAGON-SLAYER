@@ -357,7 +357,7 @@ module.exports = function slayer(mod)
     //  Use skills event
     //--------------------------------------------------------------------------------------------------------------------------------------
 
-    mod.hook('C_START_SKILL', 7, {order: -Infinity}, (event) =>
+    mod.hook('C_START_SKILL', 7, {order: -99}, (event) =>
     {
         if(job != JOB_SLAYER){return;}
         if(DEBUG == true){console.log(TAG + 'C_START_SKILL: ' + event.skill.id);}
@@ -444,26 +444,29 @@ module.exports = function slayer(mod)
         {
             OhsCount++;
 
-            if(OhsCount > 3)
+            if(mod.settings.OVERHAND == true)
             {
-                _SkillCannotStart(event.skill);
-                returnType = false;
-            }
-            else if(OVERHAND_STRIKE_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
-            {
-                let __event      = event;
-                __event.skill.id = S_OVERHAND_STRIKE_1;
-                _SkillInstance(__event, __event.skill);
-            }
-            else
-            {
-                atkIdBase--;
-                
-                if(atkIdBase < 100){atkIdBase = 0xFEFEFFEE;}
-                
-                _SkillStart(event, S_OVERHAND_STRIKE_0, true);
-                _SkillStage(event, S_OVERHAND_STRIKE_1, atkIdBase, 0);
-                _SkillEnd(event, atkIdBase, 4);
+                if(OhsCount > 3)
+                {
+                    _SkillCannotStart(event.skill);
+                    returnType = false;
+                }
+                else if(OVERHAND_STRIKE_CHAIN.includes(skillBefore) == true && skillFinish[skillBefore] == false)
+                {
+                    let __event      = event;
+                    __event.skill.id = S_OVERHAND_STRIKE_1;
+                    _SkillInstance(__event, __event.skill);
+                }
+                else
+                {
+                    atkIdBase--;
+                    
+                    if(atkIdBase < 100){atkIdBase = 0xFEFEFFEE;}
+                    
+                    _SkillStart(event, S_OVERHAND_STRIKE_0, true);
+                    _SkillStage(event, S_OVERHAND_STRIKE_1, atkIdBase, 0);
+                    _SkillEnd(event, atkIdBase, 4);
+                }
             }
         }
         else if(_SkillNumber(event.skill.id) == _SkillNumber(S_MEASURED_SLICE_0))

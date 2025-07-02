@@ -1,6 +1,7 @@
 const DefaultSettings = 
 {
     "ENABLE": true,
+    "OVERHAND": true,
     "SAVAGE_STRIKE_DOUBLE": false,
     "SAVAGE_STRIKE_CANCEL_AWSD": true,
     "SAVAGE_STRIKE_DELAY": 200,

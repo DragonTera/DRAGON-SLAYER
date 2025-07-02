@@ -5,6 +5,11 @@ module.exports = [
         "type": "bool"
     },
     {
+        "key": "OVERHAND",
+        "name": "Enable Overhand Strike emulation:",
+        "type": "bool"
+    },
+    {
         "key": "SAVAGE_STRIKE_DOUBLE",
         "name": "Enable double Savage Strike:",
         "type": "bool"
