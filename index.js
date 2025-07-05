@@ -358,15 +358,7 @@ module.exports = function slayer(mod)
             if(__wisper == true){_Wisper();}
         }
 
-        if(_SkillNumber(event.skill.id) == _SkillNumber(S_KNOCKDOWN_STRIKE_0))
-        {
-            if(skillBefore == _SkillNumber(S_KNOCKDOWN_STRIKE_0))
-            {
-                _SkillCannotStart(event.skill);
-                returnType = false;
-            }
-        }
-        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_WHIRLWIND_0))
+        if(_SkillNumber(event.skill.id) == _SkillNumber(S_WHIRLWIND_0))
         {
             if(skillCd[_SkillNumber(S_HEADLONG_RUSH)] == false && mod.settings.FORCE_HEADLONG_RUSH == true && SavageCount >= 3)
             {

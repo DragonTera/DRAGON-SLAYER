@@ -3,7 +3,7 @@
     "name": "DRAGON-SLAYER",
     "author": "Dragon",
     "description": "Generic script for slayer.",
-    "version": "1.00",
+    "version": "1.01",
     "servers": ["https://raw.githubusercontent.com/DragonTera/DRAGON-SLAYER/MASTER/"],
     "options": {
         "reloadable": true,
