@@ -104,7 +104,7 @@ module.exports = function slayer(mod)
     let skillCd      = [];
     let skillCdTask  = [];
     let skillBefore  = 0;
-    let SavageCount  = 3;
+    let SavageCount  = 4;
     let OhsCount     = 0;
 
     let taskMs       = null;
@@ -240,7 +240,7 @@ module.exports = function slayer(mod)
         clearInterval(taskMs);
         clearInterval(taskWw);
         skillBefore = 0;
-        SavageCount = 3;
+        SavageCount = 4;
         OhsCount    = 0;
 
         return;
@@ -338,7 +338,6 @@ module.exports = function slayer(mod)
         if(_SkillNumber(event.skill.id) != _SkillNumber(S_OVERHAND_STRIKE_0)){OhsCount = 0;}
 
         playerMoving = event.moving;
-        SavageCount++;
 
         let returnType = true;
         
@@ -357,10 +356,15 @@ module.exports = function slayer(mod)
             
             if(__wisper == true){_Wisper();}
         }
+        
+        if(_SkillNumber(event.skill.id) != _SkillNumber(S_OVERHAND_STRIKE_0))
+        {
+            SavageCount++;
+        }
 
         if(_SkillNumber(event.skill.id) == _SkillNumber(S_WHIRLWIND_0))
         {
-            if(skillCd[_SkillNumber(S_HEADLONG_RUSH)] == false && mod.settings.FORCE_HEADLONG_RUSH == true && SavageCount >= 3)
+            if(skillCd[_SkillNumber(S_HEADLONG_RUSH)] == false && mod.settings.FORCE_HEADLONG_RUSH == true && SavageCount > 3)
             {
                 _SkillCannotStart(event.skill);
 
@@ -530,6 +534,15 @@ module.exports = function slayer(mod)
         if(WHITE_LIST.includes(event.skill.id) == false){return;}
 
         skillFinish[_SkillNumber(event.skill.id)] = true;
+
+        if(_SkillNumber(event.skill.id) == _SkillNumber(S_OVERHAND_STRIKE_0))
+        {
+            SavageCount++;
+        }
+        else if(_SkillNumber(event.skill.id) == _SkillNumber(S_SAVAGE_STRIKE_0))
+        {
+            SavageCount = 0;
+        }
 
         return;
     });
